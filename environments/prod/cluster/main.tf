@@ -32,3 +32,10 @@ resource "google_artifact_registry_repository_iam_member" "nodes_pull" {
   role       = "roles/artifactregistry.reader"
   member     = "serviceAccount:${module.gke.node_service_account_email}"
 }
+
+# Fixed public IP for the web entrance (Envoy Gateway's load balancer).
+# Cloudflare will send visitors to this IP (Phase 5b).
+resource "google_compute_address" "ingress" {
+  name   = "prod-ingress"
+  region = var.region
+}
