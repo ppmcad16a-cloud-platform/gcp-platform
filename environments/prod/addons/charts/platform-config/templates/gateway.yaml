@@ -1,5 +1,3 @@
-# How the front door's load balancer is built: 2 copies of Envoy,
-# our fixed IP, and only Cloudflare (+ admin) may connect.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: EnvoyProxy
 metadata:
@@ -13,7 +11,13 @@ spec:
         replicas: 2
       envoyService:
         type: LoadBalancer
+        {{- with .Values.serviceAnnotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.ingressIP }}
         loadBalancerIP: {{ .Values.ingressIP | quote }}
+        {{- end }}
         loadBalancerSourceRanges:
           {{- toYaml .Values.sourceRanges | nindent 10 }}
 ---
@@ -29,8 +33,6 @@ spec:
     name: public-proxy
     namespace: envoy-gateway-system
 ---
-# The front door itself: HTTPS on 443 with the origin certificate.
-# Only namespaces labelled gateway-access=true may attach routes.
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
