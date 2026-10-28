@@ -1,0 +1,51 @@
+controller:
+  # Builds never run on the controller itself - only in agent pods.
+  numExecutors: 0
+  additionalPlugins:
+    - job-dsl:3732.v9a_c49a_61a_313   # lets JCasC create jobs from code
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      memory: 2Gi
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      welcome: |
+        jenkins:
+          systemMessage: "MERN shop CD - configured as code (gcp-platform + platform-deployments). Changes made in this UI are LOST on the next rebuild."
+      jobs: |
+        jobs:
+          - script: |
+              pipelineJob('deploy-mern') {
+                description('Deploy one MERN service: Helm rolling update, auto-rollback, smoke test')
+                parameters {
+                  choiceParam('SERVICE', ['identity-service', 'catalog-service', 'commerce-service', 'notification-service', 'api-gateway-service', 'client-service'], 'Which service to deploy')
+                  stringParam('IMAGE_TAG', '', 'Image tag already pushed to the registries, e.g. main-a6a9d50')
+                }
+                definition {
+                  cpsScm {
+                    scm {
+                      git {
+                        remote {
+                          url('https://github.com/ppmcad16a-cloud-platform/platform-deployments.git')
+                        }
+                        branch('*/main')
+                      }
+                    }
+                    scriptPath('pipelines/deploy.Jenkinsfile')
+                    lightweight(true)
+                  }
+                }
+              }
+
+# Jenkins' home is NOT kept on a disk: everything is rebuilt from code each
+# session (and no disk can be left behind).
+persistence:
+  enabled: false
+
+# Service account used by the build pods (see deployer-rbac.yaml).
+serviceAccountAgent:
+  create: true
+  name: jenkins-deployer

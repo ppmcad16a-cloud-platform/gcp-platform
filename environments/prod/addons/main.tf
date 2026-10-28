@@ -70,6 +70,14 @@ resource "helm_release" "platform_config" {
         projectID = var.project_id
       }
     }
+    # Who may deploy into "mern": the Jenkins build pods' service account.
+    deployerSubjects = [
+      {
+        kind      = "ServiceAccount"
+        name      = "jenkins-deployer"
+        namespace = "jenkins"
+      },
+    ]
   })]
 
   depends_on = [
