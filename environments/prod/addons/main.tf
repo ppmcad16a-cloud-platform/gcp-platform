@@ -82,6 +82,10 @@ resource "helm_release" "platform_config" {
     jenkins = {
       enabled = true
     }
+    # Central Grafana at grafana.<domain> (+ Slack for Alertmanager).
+    observability = {
+      grafanaHostname = "grafana.rishavmukhopadhyay.store"
+    }
   })]
 
   depends_on = [
