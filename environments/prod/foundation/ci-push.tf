@@ -6,6 +6,23 @@
 # ---------------------------------------------------------------
 locals {
   github_org = "ppmcad16a-cloud-platform"
+
+  # GitHub writes PERMANENT ids into the identity card ("immutable subject"):
+  #   repo:<org>@<org id>/<repo>@<repo id>:ref:refs/heads/main
+  # A repo that is deleted and re-created under the same name gets a NEW id,
+  # so it can never inherit these permissions.
+  # Look up an id with:  gh api repos/<org>/<repo> --jq .id
+  github_org_id = "308835253"
+  github_repo_ids = {
+    "api-gateway-service"  = "1363132826"
+    "identity-service"     = "1347625227"
+    "catalog-service"      = "1345164391"
+    "commerce-service"     = "1363104512"
+    "notification-service" = "1311276453"
+    "client-service"       = "1363120914"
+    "seed-db-service"      = "1363165699"
+  }
+
   services = [
     "api-gateway-service",
     "identity-service",
@@ -38,7 +55,7 @@ resource "google_service_account_iam_member" "ci_push_wif" {
   for_each           = toset(local.services)
   service_account_id = google_service_account.ci_push.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principal://iam.googleapis.com/${local.github_pool}/subject/repo:${local.github_org}/${each.value}:ref:refs/heads/main"
+  member             = "principal://iam.googleapis.com/${local.github_pool}/subject/repo:${local.github_org}@${local.github_org_id}/${each.value}@${local.github_repo_ids[each.value]}:ref:refs/heads/main"
 }
 
 output "ci_push_service_account" {
