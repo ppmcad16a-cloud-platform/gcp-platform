@@ -42,5 +42,6 @@ variable "app_secret_names" {
     "mern-seed-admin-password",
     "mern-origin-tls-crt",
     "mern-origin-tls-key",
+    "jenkins-trigger-token", # read by the jenkins-trigger ExternalSecret
   ]
 }

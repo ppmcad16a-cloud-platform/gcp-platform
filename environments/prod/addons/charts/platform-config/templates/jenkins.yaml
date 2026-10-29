@@ -1,0 +1,31 @@
+{{- if .Values.jenkins.enabled }}
+# Jenkins' namespace: labelled so its HTTPRoute may use the public gateway
+# (jenkins.<domain>, protected by Cloudflare Access).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jenkins
+  labels:
+    gateway-access: "true"
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+---
+# The deploy trigger token, copied from the vault. Jenkins mounts it
+# (additionalExistingSecrets) and JCasC turns it into a credential.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: jenkins-trigger
+  namespace: jenkins
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: cloud-vault
+  target:
+    name: jenkins-trigger
+  data:
+    - secretKey: token
+      remoteRef:
+        key: jenkins-trigger-token
+{{- end }}

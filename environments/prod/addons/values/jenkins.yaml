@@ -2,19 +2,49 @@ controller:
   # Builds never run on the controller itself - only in agent pods.
   numExecutors: 0
   additionalPlugins:
-    - job-dsl:3732.v9a_c49a_61a_313   # lets JCasC create jobs from code
+    - job-dsl:3732.v9a_c49a_61a_313          # lets JCasC create jobs from code
+    - generic-webhook-trigger:2.4.3          # GitHub Actions starts deploy-mern with a token
   resources:
     requests:
       cpu: 250m
       memory: 1Gi
     limits:
       memory: 2Gi
+
+  # Public address, through the GKE gateway. Cloudflare Access protects it
+  # (global-platform/jenkins-access.tf); the port-forward still works too.
+  jenkinsUrl: https://jenkins.rishavmukhopadhyay.store
+  httpRoute:
+    enabled: true
+    parentRefs:
+      - name: public
+        namespace: envoy-gateway-system
+        sectionName: https
+    hostnames:
+      - jenkins.rishavmukhopadhyay.store
+
+  # vault -> ExternalSecret "jenkins-trigger" -> mounted file
+  # -> available to JCasC below as ${jenkins-trigger-token}
+  additionalExistingSecrets:
+    - name: jenkins-trigger
+      keyName: token
+
   JCasC:
     defaultConfig: true
     configScripts:
       welcome: |
         jenkins:
           systemMessage: "MERN shop CD - configured as code (gcp-platform + platform-deployments). Changes made in this UI are LOST on the next rebuild."
+      trigger-credential: |
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+                  - string:
+                      scope: GLOBAL
+                      id: deploy-mern-trigger-token
+                      description: "Token GitHub Actions must send to start deploy-mern"
+                      secret: "${jenkins-trigger-token}"
       jobs: |
         jobs:
           - script: |
@@ -24,6 +54,34 @@ controller:
                   choiceParam('SERVICE', ['identity-service', 'catalog-service', 'commerce-service', 'notification-service', 'api-gateway-service', 'client-service'], 'Which service to deploy')
                   stringParam('IMAGE_TAG', '', 'Image tag already pushed to the registries, e.g. main-a6a9d50')
                   stringParam('TARGETS', 'gcp,azure,aws', 'Clouds to deploy to, in this order (comma-separated)')
+                }
+                // GitHub Actions POSTs {"service": "...", "image_tag": "..."} to
+                // /generic-webhook-trigger/invoke with the trigger token.
+                properties {
+                  pipelineTriggers {
+                    triggers {
+                      genericTrigger {
+                        genericVariables {
+                          genericVariable {
+                            key('SERVICE')
+                            value('$.service')
+                          }
+                          genericVariable {
+                            key('IMAGE_TAG')
+                            value('$.image_tag')
+                          }
+                        }
+                        tokenCredentialId('deploy-mern-trigger-token')
+                        causeString('GitHub Actions: deploy $SERVICE $IMAGE_TAG')
+                        printContributedVariables(true)
+                        printPostContent(false)
+                        silentResponse(false)
+                        // only the 6 deployable services; anything else is ignored
+                        regexpFilterText('$SERVICE')
+                        regexpFilterExpression('^(identity|catalog|commerce|notification|api-gateway|client)-service$')
+                      }
+                    }
+                  }
                 }
                 definition {
                   cpsScm {
