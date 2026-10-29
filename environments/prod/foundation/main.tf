@@ -17,6 +17,11 @@ resource "google_artifact_registry_repository" "mern" {
   format        = "DOCKER"
   description   = "Container images of the MERN microservices"
 
+  # A tag (e.g. main-a1b2c3d) can never be overwritten - same rule as ECR.
+  docker_config {
+    immutable_tags = true
+  }
+
   # Housekeeping: keep only the 10 newest versions of each image.
   cleanup_policy_dry_run = false
   cleanup_policies {
