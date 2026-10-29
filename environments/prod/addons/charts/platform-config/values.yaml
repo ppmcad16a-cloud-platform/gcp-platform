@@ -5,3 +5,5 @@ sourceRanges: []
 secretStore: {}
 defaultStorageClass: {}
 deployerSubjects: []
+jenkins:
+  enabled: false

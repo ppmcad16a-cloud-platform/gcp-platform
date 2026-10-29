@@ -9,7 +9,7 @@ resource "helm_release" "jenkins" {
   chart            = "jenkins"
   version          = "5.9.68"
   namespace        = "jenkins"
-  create_namespace = true
+  create_namespace = false # created (with labels) by platform-config
   wait             = true
   timeout          = 900
 

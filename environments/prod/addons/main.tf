@@ -78,6 +78,10 @@ resource "helm_release" "platform_config" {
         namespace = "jenkins"
       },
     ]
+    # Jenkins namespace + its trigger token (Jenkins runs only in GKE).
+    jenkins = {
+      enabled = true
+    }
   })]
 
   depends_on = [
