@@ -7,3 +7,6 @@ defaultStorageClass: {}
 deployerSubjects: []
 jenkins:
   enabled: false
+observability:
+  backendsHostname: "" # obs-<cloud>.<domain> (AKS, EKS)
+  grafanaHostname: ""  # grafana.<domain> (GKE only)
