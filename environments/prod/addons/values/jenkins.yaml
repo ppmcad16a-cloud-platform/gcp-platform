@@ -98,6 +98,52 @@ controller:
                   }
                 }
               }
+              pipelineJob('backup-mongo') {
+                description('Encrypted MongoDB backup to GCS + S3 + Azure Blob (nightly while the platform runs)')
+                properties {
+                  pipelineTriggers {
+                    triggers {
+                      cron {
+                        spec('H 21 * * *')   // about 02:30 in India (Jenkins runs in UTC)
+                      }
+                    }
+                  }
+                }
+                definition {
+                  cpsScm {
+                    scm {
+                      git {
+                        remote {
+                          url('https://github.com/ppmcad16a-cloud-platform/platform-deployments.git')
+                        }
+                        branch('*/main')
+                      }
+                    }
+                    scriptPath('pipelines/backup.Jenkinsfile')
+                    lightweight(true)
+                  }
+                }
+              }
+              pipelineJob('restore-drill') {
+                description('Restore the newest backup from one cloud into mern_restore_drill and verify it')
+                parameters {
+                  choiceParam('SOURCE', ['gcs', 's3', 'azure'], 'Which cloud copy to restore from')
+                }
+                definition {
+                  cpsScm {
+                    scm {
+                      git {
+                        remote {
+                          url('https://github.com/ppmcad16a-cloud-platform/platform-deployments.git')
+                        }
+                        branch('*/main')
+                      }
+                    }
+                    scriptPath('pipelines/restore-drill.Jenkinsfile')
+                    lightweight(true)
+                  }
+                }
+              }
 
 # Jenkins' home is NOT kept on a disk: everything is rebuilt from code each
 # session (and no disk can be left behind).

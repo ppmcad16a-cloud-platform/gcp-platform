@@ -48,4 +48,19 @@ spec:
       remoteRef:
         key: mern-slack-webhook-url
 
+{{- /* Identities of the backup and restore-drill build pods.
+       Workload Identity maps each one to its own Google service account
+       (foundation/dr-identities.tf); AWS and Azure trust the same names.
+       They never talk to the Kubernetes API, so no API token is mounted. */}}
+{{- range $sa := list "mongo-backup" "mongo-restore" }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $sa }}
+  namespace: jenkins
+  annotations:
+    iam.gke.io/gcp-service-account: {{ $sa }}@{{ $.Values.secretStore.gcpsm.projectID }}.iam.gserviceaccount.com
+automountServiceAccountToken: false
+
 {{- end }}
