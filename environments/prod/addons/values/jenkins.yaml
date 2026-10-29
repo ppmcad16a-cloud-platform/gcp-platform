@@ -23,6 +23,7 @@ controller:
                 parameters {
                   choiceParam('SERVICE', ['identity-service', 'catalog-service', 'commerce-service', 'notification-service', 'api-gateway-service', 'client-service'], 'Which service to deploy')
                   stringParam('IMAGE_TAG', '', 'Image tag already pushed to the registries, e.g. main-a6a9d50')
+                  stringParam('TARGETS', 'gcp,azure,aws', 'Clouds to deploy to, in this order (comma-separated)')
                 }
                 definition {
                   cpsScm {
