@@ -4,7 +4,7 @@ output "cluster_name" {
 
 output "egress_ip" {
   description = "Add this to the MongoDB Atlas IP access list (Phase 5)"
-  value       = module.network.egress_ip
+  value       = data.google_compute_address.egress.address
 }
 
 output "get_credentials" {

@@ -26,15 +26,10 @@ resource "google_compute_subnetwork" "nodes" {
   }
 }
 
-# A FIXED public IP for all traffic LEAVING the cluster.
-# MongoDB Atlas will only accept connections from this IP (Phase 5).
-resource "google_compute_address" "egress" {
-  name   = "${var.name}-egress"
-  region = var.region
-}
-
 # Cloud NAT: lets the private nodes reach the internet (Atlas, Docker Hub ...)
-# without having public IPs themselves, always using the fixed IP above.
+# without having public IPs themselves, always using ONE fixed public IP
+# (var.egress_ip_self_link - created in the foundation stack). MongoDB Atlas
+# and the AKS/EKS API allow-lists accept that IP.
 resource "google_compute_router" "this" {
   name    = "${var.name}-router"
   region  = var.region
@@ -46,7 +41,7 @@ resource "google_compute_router_nat" "this" {
   router                             = google_compute_router.this.name
   region                             = var.region
   nat_ip_allocate_option             = "MANUAL_ONLY"
-  nat_ips                            = [google_compute_address.egress.self_link]
+  nat_ips                            = [var.egress_ip_self_link]
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 
   subnetwork {

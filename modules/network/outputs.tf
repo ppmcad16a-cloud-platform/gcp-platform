@@ -13,8 +13,3 @@ output "pods_range_name" {
 output "services_range_name" {
   value = "services"
 }
-
-output "egress_ip" {
-  description = "Fixed public IP used by everything leaving the cluster"
-  value       = google_compute_address.egress.address
-}

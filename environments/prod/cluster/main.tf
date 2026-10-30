@@ -1,11 +1,18 @@
+# GKE's fixed outgoing IP - created (and kept) by the foundation stack.
+data "google_compute_address" "egress" {
+  name   = "prod-egress"
+  region = var.region
+}
+
 module "network" {
   source = "../../../modules/network"
 
-  name          = "prod"
-  region        = var.region
-  subnet_cidr   = "10.30.0.0/20"   # nodes
-  services_cidr = "10.30.16.0/20"  # Kubernetes services
-  pods_cidr     = "10.30.128.0/17" # pods
+  name                = "prod"
+  region              = var.region
+  subnet_cidr         = "10.30.0.0/20"   # nodes
+  services_cidr       = "10.30.16.0/20"  # Kubernetes services
+  pods_cidr           = "10.30.128.0/17" # pods
+  egress_ip_self_link = data.google_compute_address.egress.self_link
 }
 
 module "gke" {
