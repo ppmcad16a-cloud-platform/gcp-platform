@@ -17,6 +17,11 @@ variable "pods_cidr" {
   type        = string
 }
 
+variable "egress_ip_self_link" {
+  description = "self_link of the fixed public IP that Cloud NAT uses for all outgoing traffic"
+  type        = string
+}
+
 variable "services_cidr" {
   description = "IP range for Kubernetes services (secondary range)"
   type        = string

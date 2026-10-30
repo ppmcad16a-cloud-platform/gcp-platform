@@ -10,3 +10,8 @@ output "registry_repository" {
 output "backup_bucket" {
   value = google_storage_bucket.backups.name
 }
+
+output "gke_egress_ip" {
+  description = "GKE's fixed outgoing IP - AKS/EKS API allow-lists read it from this state"
+  value       = google_compute_address.egress.address
+}
