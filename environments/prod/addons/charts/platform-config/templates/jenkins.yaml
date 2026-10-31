@@ -29,7 +29,7 @@ spec:
       remoteRef:
         key: jenkins-trigger-token
 ---
-# Slack webhook for deploy notifications (Phase 9). The build pods read it
+# Slack webhook for deploy notifications. The build pods read it
 # as the environment variable SLACK_WEBHOOK_URL (see deploy.Jenkinsfile).
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret

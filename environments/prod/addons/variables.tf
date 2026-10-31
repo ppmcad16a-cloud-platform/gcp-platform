@@ -43,7 +43,7 @@ variable "app_secret_names" {
     "mern-origin-tls-crt",
     "mern-origin-tls-key",
     "jenkins-trigger-token",       # read by the jenkins-trigger ExternalSecret
-    "mern-slack-webhook-url",      # Alertmanager -> Slack (Phase 9)
+    "mern-slack-webhook-url",      # Alertmanager -> Slack
     "grafana-cf-access-client-id", # central Grafana -> obs-* backends
     "grafana-cf-access-client-secret",
   ]

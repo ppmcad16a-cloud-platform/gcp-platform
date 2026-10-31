@@ -3,7 +3,7 @@ resource "google_project_service" "apis" {
     "compute.googleapis.com",          # networks, VMs, IPs
     "container.googleapis.com",        # GKE
     "artifactregistry.googleapis.com", # container images
-    "secretmanager.googleapis.com",    # the "vault" (Phase 5)
+    "secretmanager.googleapis.com",    # the "vault"
   ])
   service            = each.value
   disable_on_destroy = false
@@ -42,7 +42,7 @@ resource "google_artifact_registry_repository" "mern" {
   depends_on = [google_project_service.apis]
 }
 
-# Database backups land here (Phase 10). Private, versioned, auto-deleted
+# Database backups land here. Private, versioned, auto-deleted
 # after 30 days.
 resource "google_storage_bucket" "backups" {
   name                        = "${var.project_id}-mongo-backups"

@@ -41,7 +41,7 @@ resource "google_artifact_registry_repository_iam_member" "nodes_pull" {
 }
 
 # Fixed public IP for the web entrance (Envoy Gateway's load balancer).
-# Cloudflare will send visitors to this IP (Phase 5b).
+# Cloudflare sends visitors to this IP.
 resource "google_compute_address" "ingress" {
   name   = "prod-ingress"
   region = var.region

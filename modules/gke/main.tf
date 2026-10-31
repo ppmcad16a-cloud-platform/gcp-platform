@@ -31,7 +31,7 @@ resource "google_container_cluster" "this" {
   }
 
   # Dataplane V2 actually ENFORCES Kubernetes NetworkPolicies (our firewall
-  # rules between pods, Phase 6).
+  # rules between pods).
   datapath_provider = "ADVANCED_DATAPATH"
 
   ip_allocation_policy {
@@ -58,13 +58,13 @@ resource "google_container_cluster" "this" {
   }
 
   # Workload Identity: pods can act as Google service accounts
-  # WITHOUT key files (used by External Secrets in Phase 6).
+  # WITHOUT key files (used by External Secrets).
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
 
   # Only Kubernetes' own system logs/metrics go to Google Cloud (cheap);
-  # our apps are monitored by our own Prometheus/Loki (Phase 6/9).
+  # our apps are monitored by our own Prometheus/Loki.
   logging_config {
     enable_components = ["SYSTEM_COMPONENTS"]
   }
